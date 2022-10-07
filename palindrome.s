@@ -29,7 +29,8 @@ isPalindrome:
     add t4, zero, zero  # t4 prev = NULL;
     add t5, a0, zero    # t5 cur = head;
     add t2, a0, zero    # t2 = tail = head;
-
+    li t6, 0            # t6 = 0; used to count the number of loop
+    
     lw t0, 4(a0)        # t0 = head->next;
     beq t0, zero, end2
 loop1:
@@ -77,6 +78,7 @@ loop1:
     add t4, t5, zero    # prev = cur;
     add t5, t3, zero    # cur = tmp;
 
+    addi t6,t6,1        # t6++;
     j loop1
 
 end1:
@@ -90,35 +92,44 @@ end1:
 
 loop2:
     
-    beq t5,zero,end2    # while(cur)
+    beq t6,zero,ori_loop2    # while there are unrolling iterations
     lw t0, 0(t4)        # t0 = prev->val;
     lw t1, 0(t5)        # t1 = cur->val;
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
     bne t0,t1, fail     # if(cur->val != prev->val)
     
-    beq t5,zero,end2    # while(cur)
     lw t0, 0(t4)        # t0 = prev->val;
     lw t1, 0(t5)        # t1 = cur->val;
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
     bne t0,t1, fail     # if(cur->val != prev->val)
     
-    beq t5,zero,end2    # while(cur)
     lw t0, 0(t4)        # t0 = prev->val;
     lw t1, 0(t5)        # t1 = cur->val;
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
     bne t0,t1, fail     # if(cur->val != prev->val)
     
+    lw t0, 0(t4)        # t0 = prev->val;
+    lw t1, 0(t5)        # t1 = cur->val;
+    lw t4, 4(t4)        # prev = prev->next;
+    lw t5, 4(t5)        # cur = cur->next;
+    bne t0,t1, fail     # if(cur->val != prev->val)
+    
+    addi t6,t6,-1
+    j loop2
+
+ori_loop2:
     beq t5,zero,end2    # while(cur)
     lw t0, 0(t4)        # t0 = prev->val;
     lw t1, 0(t5)        # t1 = cur->val;
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
     bne t0,t1, fail     # if(cur->val != prev->val)
-        
-    j loop2             
+          
+    j ori_loop2
+                 
 end2:
     addi a0,zero,1      # if loop terminates normally(cur == NULL).
                         # this line will be executed.
