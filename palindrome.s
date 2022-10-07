@@ -16,8 +16,8 @@ main:
     li a1, 4
     jal ra, connect # connect nodes
     
-    # addi a0,zero,100
-    # jal ra, generate
+    addi a0,zero,100
+    jal ra, generate
 
     jal ra, isPalindrome
     j print
@@ -44,6 +44,39 @@ loop1:
     add t4, t5, zero    # prev = cur;
     add t5, t3, zero    # cur = tmp;
 
+    lw t0, 4(t2)        # t0 = tail->next;
+    beq t2, zero, end1  # while(tail)
+    beq t0, zero, end1  # while(tail->next)
+    lw t1, 4(t0)        # t1 = tail->next->next;
+
+    lw t3, 4(t5)        # t3 = tmp = cur->next;
+    add t2, t1, zero    # tail = tail->next->next;
+    sw t4, 4(t5)        # cur->next = prev;
+    add t4, t5, zero    # prev = cur;
+    add t5, t3, zero    # cur = tmp;
+    
+    lw t0, 4(t2)        # t0 = tail->next;
+    beq t2, zero, end1  # while(tail)
+    beq t0, zero, end1  # while(tail->next)
+    lw t1, 4(t0)        # t1 = tail->next->next;
+
+    lw t3, 4(t5)        # t3 = tmp = cur->next;
+    add t2, t1, zero    # tail = tail->next->next;
+    sw t4, 4(t5)        # cur->next = prev;
+    add t4, t5, zero    # prev = cur;
+    add t5, t3, zero    # cur = tmp;
+    
+    lw t0, 4(t2)        # t0 = tail->next;
+    beq t2, zero, end1  # while(tail)
+    beq t0, zero, end1  # while(tail->next)
+    lw t1, 4(t0)        # t1 = tail->next->next;
+
+    lw t3, 4(t5)        # t3 = tmp = cur->next;
+    add t2, t1, zero    # tail = tail->next->next;
+    sw t4, 4(t5)        # cur->next = prev;
+    add t4, t5, zero    # prev = cur;
+    add t5, t3, zero    # cur = tmp;
+
     j loop1
 
 end1:
@@ -56,6 +89,27 @@ end1:
     lw t5, 4(t5)        # cur = cur->next
 
 loop2:
+    
+    beq t5,zero,end2    # while(cur)
+    lw t0, 0(t4)        # t0 = prev->val;
+    lw t1, 0(t5)        # t1 = cur->val;
+    lw t4, 4(t4)        # prev = prev->next;
+    lw t5, 4(t5)        # cur = cur->next;
+    bne t0,t1, fail     # if(cur->val != prev->val)
+    
+    beq t5,zero,end2    # while(cur)
+    lw t0, 0(t4)        # t0 = prev->val;
+    lw t1, 0(t5)        # t1 = cur->val;
+    lw t4, 4(t4)        # prev = prev->next;
+    lw t5, 4(t5)        # cur = cur->next;
+    bne t0,t1, fail     # if(cur->val != prev->val)
+    
+    beq t5,zero,end2    # while(cur)
+    lw t0, 0(t4)        # t0 = prev->val;
+    lw t1, 0(t5)        # t1 = cur->val;
+    lw t4, 4(t4)        # prev = prev->next;
+    lw t5, 4(t5)        # cur = cur->next;
+    bne t0,t1, fail     # if(cur->val != prev->val)
     
     beq t5,zero,end2    # while(cur)
     lw t0, 0(t4)        # t0 = prev->val;
@@ -124,6 +178,24 @@ connect:
     slli a1,a1,3        # a1 = size of list        
     add a1,a1,t0        # a1 = boundry
 con_loop:
+    bge t0,a1,con_end
+    
+    addi t1,t0,4        # t1 = address of next node
+    sw t1,0(t0)         # node->next pointing to next node
+    addi t0,t0,8        # next node
+    
+    bge t0,a1,con_end
+    
+    addi t1,t0,4        # t1 = address of next node
+    sw t1,0(t0)         # node->next pointing to next node
+    addi t0,t0,8        # next node
+    
+    bge t0,a1,con_end
+    
+    addi t1,t0,4        # t1 = address of next node
+    sw t1,0(t0)         # node->next pointing to next node
+    addi t0,t0,8        # next node
+    
     bge t0,a1,con_end
     
     addi t1,t0,4        # t1 = address of next node
