@@ -12,32 +12,12 @@
 
 main:
     
- 
-    #########
-
+    la a0, list  # s4 stores the head of the target list 
+    li a1, 4
+    jal ra, connect # connect nodes
     
-    la s4, list  # s4 stores the head of the target list 
-
-    # the process to link the list.
-    # list5 don't need this section.
-    
-    addi t0, s4, 8
-    sw t0, 4(s4)
-    addi t0, s4, 16
-    sw t0, 12(s4)
-    addi t0, s4, 24
-    sw t0, 20(s4) 
-    # addi t0, s4, 32 # for length 5 list
-    # sw t0, 28(s4)   # for length 5 list
-    
-    # end of linking section
-    
-    add a0, s4, zero
-    
-    addi a0,zero,100
-    jal ra, generate
-    
-    
+    # addi a0,zero,11
+    # jal ra, generate
 
     jal ra, isPalindrome
     j print
@@ -56,20 +36,14 @@ loop1:
     lw t0, 4(t2)        # t0 = tail->next;
     beq t2, zero, end1  # while(tail)
     beq t0, zero, end1  # while(tail->next)
-
     lw t1, 4(t0)        # t1 = tail->next->next;
-    
-    lw t3, 4(t5)        # t3 = tmp = cur->next;
-    
-    add t2, t1, zero    # tail = tail->next->next;
 
- 
+    lw t3, 4(t5)        # t3 = tmp = cur->next;
+    add t2, t1, zero    # tail = tail->next->next;
     sw t4, 4(t5)        # cur->next = prev;
     add t4, t5, zero    # prev = cur;
     add t5, t3, zero    # cur = tmp;
 
-    
-    
     j loop1
 
 end1:
@@ -90,7 +64,7 @@ loop2:
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
         
-    j loop2             #
+    j loop2             
 end2:
     addi a0,zero,1      # if loop terminates normally(cur == NULL).
                         # this line will be executed.
@@ -102,52 +76,24 @@ fail:
 ################  generate #######
 generate:
     # a0 number
-    addi sp,sp,-8
+    addi sp,sp,-8       # push s0,ra
     sw s0,0(sp)    
     sw ra,4(sp)
-    add s0,zero,a0    
-    slli s0,s0,3    # 8bytes per node, 2^3 = 8, s0 is the size of whole momery
-    add a0,s0,zero
-    jal ra, sbrk
-    la t0,heap_base
-    lw t0, 0(t0)
-    add a0,t0,zero
-    addi t0,t0,4        # t0 is the address of "next" of each node
-    add t1, t0,s0       # t1 is the boundry
-gen_loop:
     
-    bgt t0,t1,gen_end
-    addi t2,t0,4
-    sw t2,0(t0)        # node->next pointing to next node
-    sw zero,-4(t0)        # node->val = 0
-    addi t0,t0,8    # next node
-    
-    bgt t0,t1,gen_end
-    addi t2,t0,4
-    sw t2,0(t0)        # node->next pointing to next node
-    sw zero,-4(t0)        # node->val = 0
-    addi t0,t0,8    # next node
-    
-    bgt t0,t1,gen_end
-    addi t2,t0,4
-    sw t2,0(t0)        # node->next pointing to next node
-    sw zero,-4(t0)        # node->val = 0
-    addi t0,t0,8    # next node
-    
-    bgt t0,t1,gen_end
-    addi t2,t0,4
-    sw t2,0(t0)        # node->next pointing to next node
-    sw zero,-4(t0)        # node->val = 0
-    addi t0,t0,8    # next node
-    
-    j gen_loop
-gen_end:
-    sw zero,-8(t0)    # make final node pointing to null
-    
+    add s0,zero,a0      # s0 = number of node
+    slli s0,s0,3        # 8bytes per node, 2^3 = 8, s0 is 
+                        # the size of whole momery now
+    add a0,s0,zero      # prepare to pass the argument to sbrk
+    jal ra, sbrk        # call sbrk to obtain memory block
+    la t0,heap_base     
+    lw a0, 0(t0)        # t0 = start of memory block
+    srli a1,s0,3        # a1 = number of nodes
+
+    jal ra, connect
     
     lw s0,0(sp)
     lw ra,4(sp)
-    addi sp,sp,8
+    addi sp,sp,8        # pop stack
     jr ra
     
     
@@ -168,7 +114,27 @@ sbrk:
     
     jr ra
     
+################# connect #################
+connect:
+    # a0 is the address of memory block
+    # a1 is the number of nodes
+
+
+    addi t0,a0,4        # t1 = &first_node->next
+    slli a1,a1,3        # a1 = size of list        
+    add a1,a1,t0        # a1 = boundry
+con_loop:
+    bge t0,a1,con_end
     
+    addi t1,t0,4        # t1 = address of next node
+    sw t1,0(t0)         # node->next pointing to next node
+    addi t0,t0,8        # next node
+    
+    j con_loop
+con_end:
+    sw zero,-8(t0)      # make final node pointing to null
+    
+    jr ra
 
 
 ############# print #############
@@ -178,4 +144,6 @@ print:
     ecall
 
 exit:
+    
+
 
