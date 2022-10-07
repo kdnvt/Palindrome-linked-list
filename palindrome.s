@@ -172,11 +172,21 @@ sbrk:
 connect:
     # a0 is the address of memory block
     # a1 is the number of nodes
-
-
+    
+    andi t2,a1,3        # t2 = number of nodes % 4 (loop unrolling times)
     addi t0,a0,4        # t1 = &first_node->next
     slli a1,a1,3        # a1 = size of list        
     add a1,a1,t0        # a1 = boundry
+    
+con_loop_normal:
+    beq t2,zero,con_loop
+    addi t1,t0,4        # t1 = address of next node
+    sw t1,0(t0)         # node->next pointing to next node
+    addi t2,t2,-1
+    addi t0,t0,8        # next node
+    j con_loop_normal
+     
+    
 con_loop:
     bge t0,a1,con_end
     
@@ -184,19 +194,13 @@ con_loop:
     sw t1,0(t0)         # node->next pointing to next node
     addi t0,t0,8        # next node
     
-    bge t0,a1,con_end
-    
     addi t1,t0,4        # t1 = address of next node
     sw t1,0(t0)         # node->next pointing to next node
     addi t0,t0,8        # next node
     
-    bge t0,a1,con_end
-    
     addi t1,t0,4        # t1 = address of next node
     sw t1,0(t0)         # node->next pointing to next node
     addi t0,t0,8        # next node
-    
-    bge t0,a1,con_end
     
     addi t1,t0,4        # t1 = address of next node
     sw t1,0(t0)         # node->next pointing to next node
