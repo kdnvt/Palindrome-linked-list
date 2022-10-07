@@ -16,7 +16,7 @@ main:
     li a1, 4
     jal ra, connect # connect nodes
     
-    # addi a0,zero,11
+    # addi a0,zero,100
     # jal ra, generate
 
     jal ra, isPalindrome
@@ -60,9 +60,9 @@ loop2:
     beq t5,zero,end2    # while(cur)
     lw t0, 0(t4)        # t0 = prev->val;
     lw t1, 0(t5)        # t1 = cur->val;
-    bne t0,t1, fail     # if(cur->val != prev->val)
     lw t4, 4(t4)        # prev = prev->next;
     lw t5, 4(t5)        # cur = cur->next;
+    bne t0,t1, fail     # if(cur->val != prev->val)
         
     j loop2             
 end2:
